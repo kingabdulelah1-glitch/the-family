@@ -1,0 +1,231 @@
+<!doctype html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>HOME MANAGEMENT</title>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Arabic:wght@400;500;700&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.js"></script>
+<style>
+:root{--bg:#eef1f6;--card:rgba(255,255,255,.72);--ink:#14213d;--mut:#6b7385;--line:rgba(20,33,61,.1);--acc:#1d3a8a;--accT:#fff;--ok:#1f8a5b;--no:#c0392b;--wait:#b7791f;--sh:0 1px 0 rgba(255,255,255,.8) inset,0 10px 30px -12px rgba(20,33,61,.28),0 2px 4px rgba(20,33,61,.06)}
+[data-t=dark]{--bg:#0b1220;--card:rgba(255,255,255,.06);--ink:#e8edf7;--mut:#8f9ab0;--line:rgba(255,255,255,.1);--acc:#6b8cff;--accT:#0b1220;--ok:#4cc38a;--no:#ff7b6b;--wait:#e5b250;--sh:0 1px 0 rgba(255,255,255,.07) inset,0 14px 34px -14px rgba(0,0,0,.7)}
+*{box-sizing:border-box}
+body{margin:0;font-family:'IBM Plex Sans Arabic',system-ui,sans-serif;background:var(--bg);color:var(--ink);min-height:100vh;background-image:radial-gradient(900px 500px at 85% -10%,rgba(29,58,138,.16),transparent),radial-gradient(700px 400px at 0% 100%,rgba(120,130,150,.18),transparent)}
+h1,h2,h3{margin:0}h2{font-size:1.4rem;margin-bottom:14px}h3{font-size:1.02rem}
+.glass{background:var(--card);backdrop-filter:blur(16px);-webkit-backdrop-filter:blur(16px);border:1px solid var(--line);box-shadow:var(--sh);border-radius:18px}
+.card{padding:18px}
+.mut{color:var(--mut);font-size:.9rem}
+input,select,textarea{width:100%;padding:11px 13px;margin:6px 0;border-radius:12px;border:1px solid var(--line);background:var(--card);color:var(--ink);font:inherit}
+input:focus,select:focus,textarea:focus,button:focus-visible{outline:2px solid var(--acc);outline-offset:1px}
+.btn{background:var(--acc);color:var(--accT);border:0;padding:11px 18px;border-radius:12px;font:inherit;font-weight:700;cursor:pointer;transition:transform .15s,box-shadow .15s}
+.btn:hover{transform:translateY(-2px);box-shadow:0 8px 18px -8px var(--acc)}
+.btn.g{background:transparent;color:var(--ink);border:1px solid var(--line)}
+.btn.ok{background:var(--ok);color:#fff}.btn.no{background:var(--no);color:#fff}
+.btn.s{padding:7px 12px;font-size:.88rem}
+.lnk{background:none;border:0;color:var(--acc);cursor:pointer;font:inherit;margin-top:10px}
+.auth{min-height:100vh;display:grid;place-items:center;padding:20px}
+.auth .card{width:min(420px,100%);padding:26px}
+.auth h1{font-size:1.6rem;letter-spacing:.5px;margin-bottom:4px}
+.layout{display:grid;grid-template-columns:230px 1fr;gap:18px;max-width:1150px;margin:0 auto;padding:18px}
+.side{position:sticky;top:18px;align-self:start;padding:14px;display:flex;flex-direction:column;gap:4px}
+.side .brand{font-weight:700;padding:6px 10px 12px}
+.nv{display:flex;justify-content:space-between;align-items:center;padding:10px 12px;border-radius:12px;border:0;background:none;color:var(--ink);font:inherit;cursor:pointer;text-align:right}
+.nv:hover{background:var(--line)}.nv.on{background:var(--acc);color:var(--accT)}
+.bd{background:var(--no);color:#fff;border-radius:99px;font-size:.75rem;padding:1px 8px}
+.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:12px;margin-bottom:16px}
+.stat{padding:16px;transition:transform .2s}.stat:hover{transform:perspective(600px) rotateX(4deg) translateY(-3px)}
+.stat b{font-size:2rem;display:block}
+.row{display:flex;gap:10px;align-items:center;flex-wrap:wrap}.sp{justify-content:space-between}
+.stack>*+*{margin-top:12px}
+.av{width:38px;height:38px;border-radius:50%;background:var(--acc);color:var(--accT);display:grid;place-items:center;font-weight:700;position:relative;flex:none}
+.av i{position:absolute;bottom:0;inset-inline-end:0;width:11px;height:11px;border-radius:50%;background:#98a1b3;border:2px solid var(--bg)}.av i.on{background:var(--ok)}
+.chip{font-size:.8rem;padding:3px 10px;border-radius:99px;border:1px solid currentColor}
+.pending{color:var(--wait)}.accepted{color:var(--ok)}.rejected{color:var(--no)}.cancelled{color:var(--mut)}
+.nt{padding:12px 14px;border-radius:14px;border:1px solid var(--line);cursor:pointer}.nt.u{border-inline-start:4px solid var(--acc);background:var(--card)}
+.toast{position:fixed;bottom:22px;inset-inline:0;margin:auto;width:fit-content;max-width:90%;background:var(--ink);color:var(--bg);padding:11px 20px;border-radius:99px;z-index:9;animation:in .25s}
+@keyframes in{from{opacity:0;transform:translateY(10px)}}
+@media(max-width:760px){.layout{grid-template-columns:1fr;padding:12px;padding-bottom:84px}.side{position:fixed;inset:auto 8px 8px 8px;flex-direction:row;overflow-x:auto;z-index:5;padding:6px}.side .brand,.side .hide{display:none}.nv{flex:none;font-size:.85rem}}
+@media(prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
+</style>
+</head>
+<body>
+<div id="app"></div>
+<script>
+/* ====== الإعدادات: الصق هنا بيانات مشروعك من Supabase ====== */
+const SUPABASE_URL = 'https://supabase.com/dashboard/project/othxrzjhmcjeyekarpiq';
+const SUPABASE_KEY = 'sb_publishable_LFuHOa8DB5VHFZnDylpXJA_u5IHqIgC';
+/* ========================================================== */
+
+const TYPES={absence:'طلب غياب',going_out:'طلب خروج',purchase:'طلب شراء',allowance:'طلب مصروف',help:'طلب مساعدة',permission:'طلب إذن',general:'طلب عام'};
+const ST={pending:'قيد الانتظار',accepted:'تمت الموافقة',rejected:'مرفوض',cancelled:'ملغي'};
+const ACT={family_created:'إنشاء العائلة',member_joined:'انضمام فرد',request_created:'طلب جديد',request_accepted:'قبول طلب',request_rejected:'رفض طلب',request_cancelled:'إلغاء طلب'};
+const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const $=id=>document.getElementById(id);
+const app=$('app');
+const S={user:null,me:null,fam:null,members:[],reqs:[],notes:[],page:'home',logs:[]};
+const mem=id=>S.members.find(m=>m.id===id)||{};
+const nm=id=>esc(mem(id).full_name||'—');
+const fd=d=>new Date(d).toLocaleString('ar',{dateStyle:'medium',timeStyle:'short'});
+const online=m=>m.last_seen&&Date.now()-new Date(m.last_seen)<150000;
+const av=m=>`<div class="av">${esc([...(m.full_name||'?')][0])}<i class="${online(m)?'on':''}"></i></div>`;
+const toast=t=>{const e=document.createElement('div');e.className='toast';e.textContent=t;document.body.appendChild(e);setTimeout(()=>e.remove(),3200)};
+try{document.documentElement.dataset.t=localStorage.getItem('t')||'light'}catch(e){document.documentElement.dataset.t='light'}
+
+if(!SUPABASE_URL.startsWith('https')){
+  app.innerHTML=`<div class="auth"><div class="card glass"><h2>خطوة الإعداد</h2><p>افتح هذا الملف بمحرر نصوص (مثل المفكرة)، ولاقِ في أعلى السكربت السطرين <b>SUPABASE_URL</b> و <b>SUPABASE_KEY</b>، والصق بدلهم بيانات مشروعك من Supabase:<br><br><b>Project Settings ← API</b></p></div></div>`;
+} else { var sb=supabase.createClient(SUPABASE_URL,SUPABASE_KEY); start(); }
+
+/* ---------- الدخول ---------- */
+function authView(mode){
+  app.innerHTML=`<div class="auth"><div class="card glass"><h1>HOME MANAGEMENT</h1><p class="mut">نظام إدارة المنزل العائلي</p>
+  <input id="em" type="email" dir="ltr" placeholder="البريد الإلكتروني" autocomplete="email">
+  <input id="pw" type="password" dir="ltr" placeholder="كلمة المرور (6 أحرف على الأقل)" autocomplete="current-password">
+  <button class="btn" style="width:100%;margin-top:8px" onclick="A.auth('${mode}')">${mode=='in'?'تسجيل الدخول':'إنشاء حساب'}</button>
+  <button class="lnk" onclick="authView('${mode=='in'?'up':'in'}')">${mode=='in'?'ما عندك حساب؟ أنشئ حساباً':'عندك حساب؟ سجّل الدخول'}</button></div></div>`;
+}
+function onboard(){
+  app.innerHTML=`<div class="auth"><div class="card glass"><h2>مرحباً! خلنا نجهز حسابك</h2>
+  <input id="fn" placeholder="اسمك (مثل: لولو)">
+  <h3 style="margin-top:14px">أنا أول واحد في العائلة</h3>
+  <input id="fam" placeholder="اسم العائلة (مثل: عائلة أحمد)">
+  <button class="btn" style="width:100%" onclick="A.fam('create')">إنشاء العائلة (أصير مسؤول)</button>
+  <h3 style="margin-top:18px">أبغى أنضم لعائلة موجودة</h3>
+  <input id="code" dir="ltr" placeholder="كود العائلة">
+  <button class="btn g" style="width:100%" onclick="A.fam('join')">انضمام بالكود</button>
+  <button class="lnk" onclick="A.out()">تسجيل الخروج</button></div></div>`;
+}
+
+/* ---------- البيانات ---------- */
+async function start(){
+  const {data:{session}}=await sb.auth.getSession();
+  if(!session) return authView('in');
+  S.user=session.user;
+  const {data:me}=await sb.from('users').select('*').eq('id',S.user.id).maybeSingle();
+  if(!me) return onboard();
+  if(!me.is_active){await sb.auth.signOut();authView('in');return toast('حسابك معطّل، كلّم المسؤول')}
+  S.me=me;
+  await load();
+  S.fam=(await sb.from('family_groups').select('*').maybeSingle()).data;
+  subscribe(); beat(); setInterval(beat,60000);
+  shell();
+}
+async function load(){
+  const [m,r,n]=await Promise.all([
+    sb.from('users').select('*').order('created_at'),
+    sb.from('requests').select('*').order('created_at',{ascending:false}),
+    sb.from('notifications').select('*').order('created_at',{ascending:false}).limit(50)]);
+  S.members=m.data||[];S.reqs=r.data||[];S.notes=n.data||[];
+  S.me=S.members.find(x=>x.id===S.user.id)||S.me;
+}
+const beat=()=>sb.from('users').update({last_seen:new Date().toISOString()}).eq('id',S.me.id).then(()=>{});
+function subscribe(){
+  const f=()=>refresh();
+  sb.channel('hm')
+   .on('postgres_changes',{event:'INSERT',schema:'public',table:'notifications',filter:'user_id=eq.'+S.me.id},p=>{toast('🔔 '+p.new.title);f()})
+   .on('postgres_changes',{event:'*',schema:'public',table:'requests'},f)
+   .on('postgres_changes',{event:'*',schema:'public',table:'users'},f).subscribe();
+}
+async function refresh(){await load();draw(S.page==='new')}
+
+/* ---------- الواجهة ---------- */
+const unread=()=>S.notes.filter(n=>!n.is_read).length;
+const incomingPending=()=>S.reqs.filter(r=>r.to_user===S.me.id&&r.status==='pending').length;
+function shell(){
+  app.innerHTML=`<div class="layout"><nav class="side glass" id="nav"></nav><main id="main"></main></div>`;
+  draw();
+}
+function draw(navOnly){
+  const items=[['home','🏠 الرئيسية'],['new','✍️ طلب جديد'],['mine','📤 طلباتي'],['inc','📥 الواردة',incomingPending()],['notes','🔔 الإشعارات',unread()],['members','👨‍👩‍👧 العائلة']];
+  if(S.me.role==='admin')items.push(['admin','🛡️ الإدارة']);
+  $('nav').innerHTML=`<div class="brand">HOME MANAGEMENT<div class="mut">${esc(S.fam?.name)}</div></div>`+
+    items.map(([k,l,b])=>`<button class="nv ${S.page===k?'on':''}" onclick="A.go('${k}')">${l}${b?`<span class="bd">${b}</span>`:''}</button>`).join('')+
+    `<button class="nv hide" onclick="A.theme()">🌓 الوضع</button><button class="nv hide" onclick="A.out()">↩️ خروج</button>`;
+  if(!navOnly) $('main').innerHTML=({home,new:newReq,mine,inc,notes,members,admin})[S.page]();
+}
+function reqCard(r,mode){
+  const pend=r.status==='pending';
+  return `<div class="card glass"><div class="row sp"><h3>${esc(r.subject)}</h3><span class="chip ${r.status}">${ST[r.status]}</span></div>
+  <div class="mut">${TYPES[r.type]} · من ${nm(r.from_user)} إلى ${nm(r.to_user)} · ${fd(r.created_at)}</div>
+  ${r.message?`<p>${esc(r.message)}</p>`:''}
+  ${r.response_note?`<p class="mut">ملاحظة الرد: ${esc(r.response_note)}</p>`:''}
+  ${pend&&mode!=='out'?`<input id="n${r.id}" placeholder="ملاحظة أو سبب الرفض"><div class="row"><button class="btn ok s" onclick="A.resp('${r.id}','accepted')">قبول</button><button class="btn no s" onclick="A.resp('${r.id}','rejected')">رفض</button></div>`:''}
+  ${pend&&mode==='out'?`<button class="btn g s" onclick="A.cancel('${r.id}')">إلغاء الطلب</button>`:''}</div>`;
+}
+const list=(a,m,empty)=>a.length?`<div class="stack">${a.map(r=>reqCard(r,m)).join('')}</div>`:`<div class="card glass mut">${empty}</div>`;
+function home(){
+  const mine=S.reqs.filter(r=>r.from_user===S.me.id), inc=S.reqs.filter(r=>r.to_user===S.me.id);
+  return `<h2>أهلاً ${esc(S.me.full_name)} 👋</h2>
+  <div class="grid"><div class="card glass stat"><b>${inc.filter(r=>r.status==='pending').length}</b>طلبات واردة بانتظارك</div>
+  <div class="card glass stat"><b>${mine.filter(r=>r.status==='pending').length}</b>طلباتي المعلّقة</div>
+  <div class="card glass stat"><b>${unread()}</b>إشعارات جديدة</div></div>
+  <button class="btn" onclick="A.go('new')">+ إنشاء طلب جديد</button>
+  <h3 style="margin:22px 0 10px">أفراد العائلة</h3>
+  <div class="grid">${S.members.map(m=>`<div class="card glass row">${av(m)}<div><b>${esc(m.full_name)}</b><div class="mut">${online(m)?'متصل الآن':'غير متصل'}</div></div></div>`).join('')}</div>
+  <h3 style="margin:22px 0 10px">آخر الإشعارات</h3>${S.notes.slice(0,4).map(nt).join('')||'<div class="mut">لا توجد إشعارات بعد</div>'}`;
+}
+function newReq(){
+  const others=S.members.filter(m=>m.id!==S.me.id&&m.is_active);
+  if(!others.length)return `<h2>طلب جديد</h2><div class="card glass mut">ما في أحد ثاني في العائلة بعد. شارك كود العائلة (من صفحة العائلة) عشان ينضمون.</div>`;
+  return `<h2>طلب جديد</h2><div class="card glass"><label>إلى</label><select id="to">${others.map(m=>`<option value="${m.id}">${esc(m.full_name)}</option>`).join('')}</select>
+  <label>نوع الطلب</label><select id="ty">${Object.entries(TYPES).map(([k,v])=>`<option value="${k}">${v}</option>`).join('')}</select>
+  <input id="su" placeholder="الموضوع (مثل: طلب غياب)"><textarea id="ms" rows="4" placeholder="الرسالة"></textarea>
+  <button class="btn" onclick="A.send()">إرسال الطلب</button></div>`;
+}
+const mine=()=>`<h2>طلباتي</h2>`+list(S.reqs.filter(r=>r.from_user===S.me.id),'out','ما أرسلت أي طلب بعد.');
+const inc=()=>`<h2>الطلبات الواردة</h2>`+list(S.reqs.filter(r=>r.to_user===S.me.id),'in','ما وصلك أي طلب بعد.');
+const nt=n=>`<div class="nt ${n.is_read?'':'u'}" onclick="A.read('${n.id}')"><b>${esc(n.title)}</b><div class="mut">${esc(n.body||'')} · ${fd(n.created_at)}</div></div>`;
+function notes(){return `<div class="row sp"><h2>الإشعارات</h2><button class="btn g s" onclick="A.readAll()">تعليم الكل كمقروء</button></div><div class="stack">${S.notes.map(nt).join('')||'<div class="card glass mut">لا توجد إشعارات.</div>'}</div>`}
+function members(){
+  const adm=S.me.role==='admin';
+  return `<h2>أفراد العائلة</h2>${adm?`<div class="card glass" style="margin-bottom:14px">كود الانضمام للعائلة: <b dir="ltr" style="user-select:all">${esc(S.fam?.invite_code)}</b><div class="mut">أعطه لأفراد عائلتك عشان يسجلون ويدخلون.</div></div>`:''}
+  <div class="stack">${S.members.map(m=>`<div class="card glass row sp"><div class="row">${av(m)}<div><b>${esc(m.full_name)}</b><div class="mut">${m.role==='admin'?'مسؤول':'عضو'}${m.is_active?'':' · معطّل'}</div></div></div>
+  ${adm&&m.id!==S.me.id?`<div class="row"><button class="btn g s" onclick="A.role('${m.id}','${m.role==='admin'?'member':'admin'}')">${m.role==='admin'?'خفض لعضو':'ترقية لمسؤول'}</button><button class="btn g s" onclick="A.active('${m.id}',${!m.is_active})">${m.is_active?'تعطيل':'تفعيل'}</button></div>`:''}</div>`).join('')}</div>`;
+}
+function admin(){
+  const c=s=>S.reqs.filter(r=>r.status===s).length;
+  return `<h2>لوحة الإدارة</h2><div class="grid">${Object.keys(ST).map(s=>`<div class="card glass stat"><b class="${s}">${c(s)}</b>${ST[s]}</div>`).join('')}</div>
+  <h3 style="margin-bottom:10px">الطلبات المعلقة في العائلة</h3>${list(S.reqs.filter(r=>r.status==='pending'),'admin','لا توجد طلبات معلقة.')}
+  <h3 style="margin:22px 0 10px">سجل النشاطات</h3><div class="card glass stack">${S.logs.map(l=>`<div class="row sp"><span>${nm(l.actor_id)} — ${ACT[l.action]||esc(l.action)}</span><span class="mut">${fd(l.created_at)}</span></div>`).join('')||'<span class="mut">لا يوجد نشاط.</span>'}</div>`;
+}
+
+/* ---------- الأوامر ---------- */
+const A={
+  async go(p){S.page=p;if(p==='admin'){S.logs=(await sb.from('activity_logs').select('*').order('created_at',{ascending:false}).limit(25)).data||[]}draw()},
+  theme(){const t=document.documentElement.dataset.t==='dark'?'light':'dark';document.documentElement.dataset.t=t;try{localStorage.setItem('t',t)}catch(e){}},
+  async out(){await sb.auth.signOut();S.me=null;authView('in')},
+  async auth(mode){
+    const email=$('em').value.trim(),password=$('pw').value;
+    if(!email||password.length<6)return toast('اكتب الإيميل وكلمة مرور من 6 أحرف أو أكثر');
+    const r=mode==='in'?await sb.auth.signInWithPassword({email,password}):await sb.auth.signUp({email,password});
+    if(r.error)return toast(r.error.message);
+    if(!r.data.session)return toast('تحقق من بريدك لتأكيد الحساب، أو عطّل Confirm email في Supabase');
+    start();
+  },
+  async fam(kind){
+    const n=$('fn').value.trim();if(!n)return toast('اكتب اسمك أولاً');
+    const r=kind==='create'?await sb.rpc('create_family',{p_family_name:$('fam').value.trim()||'عائلتي',p_full_name:n}):await sb.rpc('join_family',{p_invite_code:$('code').value.trim(),p_full_name:n});
+    if(r.error)return toast(r.error.message);
+    start();
+  },
+  async send(){
+    const su=$('su').value.trim();if(!su)return toast('اكتب موضوع الطلب');
+    const {error}=await sb.from('requests').insert({family_id:S.me.family_id,from_user:S.me.id,to_user:$('to').value,type:$('ty').value,subject:su,message:$('ms').value.trim()||null});
+    if(error)return toast(error.message);
+    toast('تم إرسال الطلب ✅');await load();A.go('mine');
+  },
+  async resp(id,status){
+    const note=$('n'+id).value.trim();
+    if(status==='rejected'&&!note)return toast('اكتب سبب الرفض');
+    const {error}=await sb.from('requests').update({status,response_note:note||null}).eq('id',id);
+    if(error)return toast(error.message);
+    refresh();
+  },
+  async cancel(id){const {error}=await sb.from('requests').update({status:'cancelled'}).eq('id',id);if(error)return toast(error.message);refresh()},
+  async read(id){await sb.from('notifications').update({is_read:true}).eq('id',id);refresh()},
+  async readAll(){await sb.from('notifications').update({is_read:true}).eq('user_id',S.me.id).eq('is_read',false);refresh()},
+  async role(id,role){const {error}=await sb.from('users').update({role}).eq('id',id);if(error)return toast(error.message);refresh()},
+  async active(id,v){const {error}=await sb.from('users').update({is_active:v}).eq('id',id);if(error)return toast(error.message);refresh()}
+};
+</script>
+</body>
+</html>
